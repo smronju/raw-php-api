@@ -24,12 +24,17 @@ class SubscriberService
         }
     }
 
-    public function find($email)
+    public function find($identifier)
     {
         try {
-            $statement = "SELECT id, first_name, last_name, email, status FROM subscribers WHERE email = ?;";
+            if (is_numeric($identifier)) {
+                $statement = "SELECT id, first_name, last_name, email, status FROM subscribers WHERE id = ?;";
+            } else {
+                $statement = "SELECT id, first_name, last_name, email, status FROM subscribers WHERE email = ?;";
+            }
+
             $statement = $this->databaseConnection->prepare($statement);
-            $statement->execute(array($email));
+            $statement->execute(array($identifier));
 
             return $statement->fetchAll(PDO::FETCH_ASSOC);
         } catch (\PDOException $exception) {
@@ -50,6 +55,20 @@ class SubscriberService
                     'status' => $data['status'] ?? 0,
                 )
             );
+
+            return $statement->rowCount();
+        } catch (PDOException $exception) {
+            exit($exception->getMessage());
+        }
+    }
+
+    public function delete($id)
+    {
+        $statement = "DELETE FROM subscribers WHERE id = :id;";
+
+        try {
+            $statement = $this->databaseConnection->prepare($statement);
+            $statement->execute(array('id' => $id));
 
             return $statement->rowCount();
         } catch (PDOException $exception) {
@@ -109,15 +128,18 @@ class SubscriberService
             $this->createTable();
             $this->truncateTable();
 
-            $sql = "INSERT INTO subscribers (first_name, last_name, email)
+            $sql = "INSERT INTO subscribers (first_name, last_name, email, status)
             VALUES
-                ('John', 'Doe', 'johndoe@mailinator.com'),
-                ('Jane', 'Doe', 'janedoe@mailinator.com'),
-                ('John', 'Smith', 'johnsmith@mailinator.com'),
-                ('Jenny', 'Doe', 'jennydoe@mailinator.com'),
-                ('Johny', 'Doe', 'johnydoe@mailinator.com'),
-                ('Joe', 'Doe', 'joedoe@mailinator.com'),
-                ('Joy', 'Doe', 'joydoe@mailinator.com')";
+                ('John', 'Doe', 'johndoe@mailinator.com', 1),
+                ('Jane', 'Doe', 'janedoe@mailinator.com', 1),
+                ('John', 'Smith', 'johnsmith@mailinator.com', 0),
+                ('Jenny', 'Doe', 'jennydoe@mailinator.com', 1),
+                ('Johny', 'Doe', 'johnydoe@mailinator.com', 1),
+                ('Joe', 'Doe', 'joedoe@mailinator.com', 1),
+                ('Jimmy', 'Doe', 'jimmydoe@mailinator.com', 0),
+                ('Jeck', 'Doe', 'jeckdoe@mailinator.com', 1),
+                ('Jen', 'Doe', 'jendoe@mailinator.com', 1),
+                ('Joy', 'Doe', 'joydoe@mailinator.com', 0)";
 
             $statement = $this->databaseConnection->query($sql);
             return $statement->rowCount();

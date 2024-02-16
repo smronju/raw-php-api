@@ -9,7 +9,7 @@ class SubscriberController
 {
     private SubscriberService $subscriber;
 
-    public function __construct(public $requestMethod, public $databaseConnection)
+    public function __construct(public $requestMethod, public $databaseConnection, public $subscriberId)
     {
         $this->subscriber = new SubscriberService($databaseConnection);
     }
@@ -33,6 +33,7 @@ class SubscriberController
         $response = match ($this->requestMethod) {
             'GET' => $this->getSubscriber(),
             'POST' => $this->createSubscriberFromRequest(),
+            'DELETE' => $this->deleteSubscriber(),
             default => $this->notFoundResponse(),
         };
 
@@ -45,7 +46,7 @@ class SubscriberController
 
     private function getSubscriber(): array
     {
-        $subscribers = $this->subscriber->paginate(10);
+        $subscribers = $this->subscriber->paginate(5);
 
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
         $response['body'] = json_encode($subscribers);
@@ -53,9 +54,21 @@ class SubscriberController
         return $response;
     }
 
+    private function deleteSubscriber() {
+        if ($this->subscriberId && $this->subscriber->find($this->subscriberId)) {
+            $this->subscriber->delete($this->subscriberId);
+            $response['status_code_header'] = 'HTTP/1.1 200 Okay';
+            $response['body'] = json_encode(['Subscriber deleted.']);
+
+            return $response;
+        }
+
+        return $this->notFoundResponse();
+    }
+
     private function createSubscriberFromRequest(): array
     {
-        if ($this->subscriber->find($_REQUEST['email'])) {
+        if (isset($_REQUEST['email']) && $this->subscriber->find($_REQUEST['email'])) {
             $response['status_code_header'] = 'HTTP/1.1 302 Found';
             $response['body'] = json_encode(['Subscriber already exist.']);
 

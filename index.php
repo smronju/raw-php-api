@@ -18,8 +18,14 @@ if ($uri[1] !== 'subscriber') {
     exit();
 }
 
+$subscriberId = null;
+
+if (isset($uri[2])) {
+    $subscriberId = (int) $uri[2];
+}
+
 $requestMethod = $_SERVER['REQUEST_METHOD'];
-$controller = new SubscriberController($requestMethod, $databaseConnection);
+$controller = new SubscriberController($requestMethod, $databaseConnection, $subscriberId);
 
 if ((isset($uri[1]) && $uri[1] === 'subscriber') && (isset($uri[2]) && $uri[2] === 'seed')) {
     $controller->seedDatabase();
