@@ -46,10 +46,18 @@ class SubscriberController
 
     private function getSubscriber(): array
     {
-        $subscribers = $this->subscriber->paginate(5);
+        if ($this->subscriberId) {
+            $result = $this->subscriber->find($this->subscriberId);
+
+            if (empty($result)) {
+                return $this->notFoundResponse();
+            }
+        } else {
+            $result = $this->subscriber->paginate(5);
+        };
 
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = json_encode($subscribers);
+        $response['body'] = json_encode($result);
 
         return $response;
     }
