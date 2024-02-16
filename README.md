@@ -39,3 +39,14 @@ php -S 127.0.0.1:8000
 Now create table and seed some data by [127.0.0.1:8000/subscriber/seed](127.0.0.1:8000/subscriber/seed).
 
 Navigating [127.0.0.1:8000/subscriber](127.0.0.1:8000/subscriber) should return a subscriber paginated list.
+
+
+### Endpoints
+
+```GET /subscriber``` returns paginated records
+
+```GET /subscriber/{id}``` return a specific record
+
+```POST /subscriber``` create a new record
+
+```DELETE /subscriber/{id}``` delete an existing record
